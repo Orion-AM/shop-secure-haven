@@ -1,15 +1,36 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Menu, User, Search } from "lucide-react";
+import { ShoppingCart, Menu, User, Search, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import { useSearch } from "@/contexts/SearchContext";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isAuthenticated, user, logout } = useAuth();
+  const { itemCount } = useCart();
+  const { searchTerm, setSearchTerm, setIsSearching } = useSearch();
   const [mobileSearchVisible, setMobileSearchVisible] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      setIsSearching(true);
+      navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -29,6 +50,11 @@ const Navbar = () => {
                 <Link to="/categories" className="px-2 py-1 text-lg font-medium">Categories</Link>
                 <Link to="/about" className="px-2 py-1 text-lg font-medium">About</Link>
                 <Link to="/contact" className="px-2 py-1 text-lg font-medium">Contact</Link>
+                {isAuthenticated ? (
+                  <Link to="/account" className="px-2 py-1 text-lg font-medium">My Account</Link>
+                ) : (
+                  <Link to="/auth/login" className="px-2 py-1 text-lg font-medium">Sign In</Link>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
@@ -56,14 +82,16 @@ const Navbar = () => {
           </nav>
         </div>
 
-        <div className="hidden md:flex items-center relative w-full max-w-sm mx-4">
+        <form onSubmit={handleSearch} className="hidden md:flex items-center relative w-full max-w-sm mx-4">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search products..."
             className="pl-8 bg-background"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-        </div>
+        </form>
 
         <div className="flex items-center gap-4">
           <Button
@@ -80,19 +108,40 @@ const Navbar = () => {
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
               <span className="sr-only">Cart</span>
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
-                0
-              </span>
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                  {itemCount > 99 ? '99+' : itemCount}
+                </span>
+              )}
             </Button>
           </Link>
 
-          {isLoggedIn ? (
-            <Link to="/account">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-                <span className="sr-only">Account</span>
-              </Button>
-            </Link>
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">Account</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <div className="px-2 py-1.5 text-sm font-medium">
+                  Hello, {user?.name || 'User'}
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/account">My Account</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/account?tab=orders">My Orders</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="text-red-500">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Link to="/auth/login">
               <Button size="sm" variant="default">
@@ -103,7 +152,8 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div
+      <form 
+        onSubmit={handleSearch}
         className={cn(
           "md:hidden container overflow-hidden transition-all duration-300",
           mobileSearchVisible ? "h-14 py-2" : "h-0 py-0"
@@ -115,9 +165,11 @@ const Navbar = () => {
             type="search"
             placeholder="Search products..."
             className="pl-8 w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-      </div>
+      </form>
     </header>
   );
 };

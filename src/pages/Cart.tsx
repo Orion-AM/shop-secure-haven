@@ -1,54 +1,21 @@
 
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ShoppingCart } from "lucide-react";
-
-// Mock cart items
-const initialCartItems = [
-  {
-    id: "1",
-    name: "Smart Home Security Camera",
-    price: 129.99,
-    image: "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&q=80&w=500",
-    quantity: 1
-  },
-  {
-    id: "2",
-    name: "Biometric Door Lock",
-    price: 249.99,
-    image: "https://images.unsplash.com/photo-1622557850710-1ec5c4f46a43?auto=format&q=80&w=500",
-    quantity: 1
-  }
-];
+import { useCart } from "@/contexts/CartContext";
+import { useState } from "react";
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const { items, removeItem, updateQuantity, subtotal, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
 
-  // Calculate cart totals
-  const subtotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  // Calculate shipping and tax
   const shipping = subtotal > 100 ? 0 : 10;
   const tax = subtotal * 0.08; // 8% tax
   const total = subtotal + shipping + tax;
-
-  // Update item quantity
-  const updateQuantity = (id: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    
-    setCartItems(cartItems.map(item => 
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    ));
-  };
-
-  // Remove item from cart
-  const removeItem = (id: string) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
-    toast.success("Item removed from cart");
-  };
 
   // Proceed to checkout
   const checkout = () => {
@@ -56,7 +23,7 @@ const Cart = () => {
     // Simulate checkout process
     setTimeout(() => {
       toast.success("Order placed successfully!");
-      setCartItems([]);
+      clearCart();
       setLoading(false);
     }, 1500);
   };
@@ -65,12 +32,12 @@ const Cart = () => {
     <div className="container py-8">
       <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
       
-      {cartItems.length > 0 ? (
+      {items.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <Card>
               <CardContent className="p-6">
-                {cartItems.map((item, index) => (
+                {items.map((item, index) => (
                   <div key={item.id}>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center py-4 gap-4">
                       <div className="w-24 h-24 rounded-md overflow-hidden flex-shrink-0">
@@ -117,7 +84,7 @@ const Cart = () => {
                         </button>
                       </div>
                     </div>
-                    {index < cartItems.length - 1 && <Separator />}
+                    {index < items.length - 1 && <Separator />}
                   </div>
                 ))}
               </CardContent>

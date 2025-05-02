@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
-import { toast } from "sonner";
+import { useCart } from "@/contexts/CartContext";
 
 interface ProductCardProps {
   id: string;
@@ -14,9 +14,10 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ id, name, price, image, category }: ProductCardProps) => {
-  const addToCart = () => {
-    // This would be replaced with actual cart functionality
-    toast.success(`Added ${name} to your cart!`);
+  const { addItem } = useCart();
+
+  const handleAddToCart = () => {
+    addItem({ id, name, price, image });
   };
 
   return (
@@ -43,7 +44,7 @@ const ProductCard = ({ id, name, price, image, category }: ProductCardProps) => 
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button 
-          onClick={addToCart}
+          onClick={handleAddToCart}
           className="w-full"
         >
           <ShoppingCart className="h-4 w-4 mr-2" /> Add to cart

@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShoppingCart } from "lucide-react";
-import { toast } from "sonner";
 import ProductCard from "@/components/ProductCard";
+import { useCart } from "@/contexts/CartContext";
 
 // Mock product data
 const mockProduct = {
@@ -61,6 +61,7 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+  const { addItem } = useCart();
   
   // In a real app, we would fetch the product data based on the ID
   const product = mockProduct;
@@ -77,9 +78,16 @@ const ProductDetail = () => {
     }
   };
   
-  const addToCart = () => {
-    // In a real app, this would add the product to the cart
-    toast.success(`Added ${quantity} ${quantity > 1 ? 'items' : 'item'} to your cart!`);
+  const handleAddToCart = () => {
+    // Add item to cart with current quantity
+    for (let i = 0; i < quantity; i++) {
+      addItem({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0]
+      });
+    }
   };
 
   return (
@@ -176,7 +184,7 @@ const ProductDetail = () => {
               </button>
             </div>
             
-            <Button onClick={addToCart} className="flex-1" disabled={product.stock === 0}>
+            <Button onClick={handleAddToCart} className="flex-1" disabled={product.stock === 0}>
               <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
             </Button>
           </div>

@@ -1,10 +1,11 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const Register = () => {
@@ -12,8 +13,7 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const { register, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,20 +29,11 @@ const Register = () => {
       return;
     }
     
-    setIsLoading(true);
-    
     try {
-      // In a real application, we would call a registration API here
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulate successful registration
-      toast.success("Registration successful! Please log in.");
-      navigate("/auth/login");
+      await register(name, email, password);
     } catch (error) {
+      // Error is handled in the auth context
       console.error("Registration error:", error);
-      toast.error("Registration failed. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   };
 

@@ -1,42 +1,30 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const { login, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Basic validation
     if (!email || !password) {
-      toast.error("Please enter both email and password");
       return;
     }
     
-    setIsLoading(true);
-    
     try {
-      // In a real application, we would call an authentication API here
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulate successful login
-      localStorage.setItem("isAuthenticated", "true");
-      toast.success("Login successful");
-      navigate("/");
+      await login(email, password);
     } catch (error) {
+      // Error is handled in the auth context
       console.error("Login error:", error);
-      toast.error("Invalid email or password");
-    } finally {
-      setIsLoading(false);
     }
   };
 
