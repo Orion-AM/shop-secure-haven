@@ -68,15 +68,15 @@ const Contact = () => {
             
             <div>
               <h4 className="font-medium mb-1">Phone</h4>
-              <p className="text-muted-foreground">+1 (555) 123-4567</p>
+              <p className="text-muted-foreground">+91 88888 58793</p>
             </div>
             
             <div>
               <h4 className="font-medium mb-1">Address</h4>
               <p className="text-muted-foreground">
-                SecureHaven Inc.<br />
-                123 Security Street<br />
-                Safe City, SC 10101
+                MIT WPU<br />
+                Kothrud, Pune<br />
+                MH, India - 411 038
               </p>
             </div>
             
