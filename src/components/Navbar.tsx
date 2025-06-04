@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Menu, User, Search, LogOut } from "lucide-react";
+import { ShoppingCart, Menu, User, Search, LogOut, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -51,7 +51,10 @@ const Navbar = () => {
                 <Link to="/about" className="px-2 py-1 text-lg font-medium">About</Link>
                 <Link to="/contact" className="px-2 py-1 text-lg font-medium">Contact</Link>
                 {isAuthenticated ? (
-                  <Link to="/account" className="px-2 py-1 text-lg font-medium">My Account</Link>
+                  <>
+                    <Link to="/account" className="px-2 py-1 text-lg font-medium">My Account</Link>
+                    <Link to="/admin" className="px-2 py-1 text-lg font-medium">Admin Panel</Link>
+                  </>
                 ) : (
                   <Link to="/auth/login" className="px-2 py-1 text-lg font-medium">Sign In</Link>
                 )}
@@ -134,6 +137,13 @@ const Navbar = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/account?tab=orders">My Orders</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/admin" className="flex items-center">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Admin Panel
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="text-red-500">
