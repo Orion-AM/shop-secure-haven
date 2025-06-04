@@ -14,6 +14,8 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import AdminLogin from "./pages/AdminLogin";
+import AdminRegister from "./pages/AdminRegister";
 import Account from "./pages/Account";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -44,6 +46,8 @@ const App = () => (
                 </Route>
                 <Route path="/auth/login" element={<Login />} />
                 <Route path="/auth/register" element={<Register />} />
+                <Route path="/auth/admin-login" element={<AdminLogin />} />
+                <Route path="/auth/admin-register" element={<AdminRegister />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </SearchProvider>

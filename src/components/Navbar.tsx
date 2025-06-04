@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Menu, User, Search, LogOut, Settings } from "lucide-react";
+import { ShoppingCart, Menu, User, Search, LogOut, Settings, Shield } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, isAdmin } = useAuth();
   const { itemCount } = useCart();
   const { searchTerm, setSearchTerm, setIsSearching } = useSearch();
   const [mobileSearchVisible, setMobileSearchVisible] = useState(false);
@@ -53,10 +53,21 @@ const Navbar = () => {
                 {isAuthenticated ? (
                   <>
                     <Link to="/account" className="px-2 py-1 text-lg font-medium">My Account</Link>
-                    <Link to="/admin" className="px-2 py-1 text-lg font-medium">Admin Panel</Link>
+                    {isAdmin && (
+                      <Link to="/admin" className="px-2 py-1 text-lg font-medium flex items-center">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Admin Panel
+                      </Link>
+                    )}
                   </>
                 ) : (
-                  <Link to="/auth/login" className="px-2 py-1 text-lg font-medium">Sign In</Link>
+                  <>
+                    <Link to="/auth/login" className="px-2 py-1 text-lg font-medium">Sign In</Link>
+                    <Link to="/auth/admin-login" className="px-2 py-1 text-lg font-medium flex items-center">
+                      <Shield className="h-4 w-4 mr-2" />
+                      Admin Login
+                    </Link>
+                  </>
                 )}
               </nav>
             </SheetContent>
@@ -107,45 +118,56 @@ const Navbar = () => {
             <span className="sr-only">Search</span>
           </Button>
 
-          <Link to="/cart">
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              <span className="sr-only">Cart</span>
-              {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
-                  {itemCount > 99 ? '99+' : itemCount}
-                </span>
-              )}
-            </Button>
-          </Link>
+          {!isAdmin && (
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                <span className="sr-only">Cart</span>
+                {itemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                    {itemCount > 99 ? '99+' : itemCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+          )}
 
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
+                  {isAdmin ? <Shield className="h-5 w-5" /> : <User className="h-5 w-5" />}
                   <span className="sr-only">Account</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <div className="px-2 py-1.5 text-sm font-medium">
                   Hello, {user?.name || 'User'}
+                  {isAdmin && <span className="text-xs text-muted-foreground block">Admin Account</span>}
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/account">My Account</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/account?tab=orders">My Orders</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/admin" className="flex items-center">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Admin Panel
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                {!isAdmin && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/account">My Account</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/account?tab=orders">My Orders</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Admin Panel
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={logout} className="text-red-500">
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign out
@@ -153,11 +175,19 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link to="/auth/login">
-              <Button size="sm" variant="default">
-                Sign in
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to="/auth/login">
+                <Button size="sm" variant="outline">
+                  Sign in
+                </Button>
+              </Link>
+              <Link to="/auth/admin-login">
+                <Button size="sm" variant="default">
+                  <Shield className="h-4 w-4 mr-1" />
+                  Admin
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
       </div>
