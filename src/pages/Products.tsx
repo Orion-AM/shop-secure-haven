@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
@@ -201,7 +200,7 @@ const Products = () => {
                 <Checkbox
                   id="in-stock"
                   checked={showInStock}
-                  onCheckedChange={setShowInStock}
+                  onCheckedChange={(checked) => setShowInStock(checked === true)}
                 />
                 <Label htmlFor="in-stock" className="text-sm font-normal cursor-pointer">
                   In Stock Only

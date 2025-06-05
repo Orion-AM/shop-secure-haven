@@ -24,6 +24,12 @@ import Admin from "./pages/Admin";
 import Categories from "./pages/Categories";
 import Wishlist from "./pages/Wishlist";
 import NotFound from "./pages/NotFound";
+import Help from "./pages/Help";
+import Shipping from "./pages/Shipping";
+import Returns from "./pages/Returns";
+import Careers from "./pages/Careers";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
