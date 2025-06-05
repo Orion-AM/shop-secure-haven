@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import { SearchProvider } from "./contexts/SearchContext";
+import { WishlistProvider } from "./contexts/WishlistContext";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
@@ -21,6 +22,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
 import Categories from "./pages/Categories";
+import Wishlist from "./pages/Wishlist";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,26 +35,29 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
-            <SearchProvider>
-              <Routes>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/products/:id" element={<ProductDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/account" element={<Account />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/categories" element={<Categories />} />
-                  <Route path="/admin" element={<Admin />} />
-                </Route>
-                <Route path="/auth/login" element={<Login />} />
-                <Route path="/auth/register" element={<Register />} />
-                <Route path="/auth/admin-login" element={<AdminLogin />} />
-                <Route path="/auth/admin-register" element={<AdminRegister />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </SearchProvider>
+            <WishlistProvider>
+              <SearchProvider>
+                <Routes>
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/products/:id" element={<ProductDetail />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
+                    <Route path="/account" element={<Account />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/categories" element={<Categories />} />
+                    <Route path="/admin" element={<Admin />} />
+                  </Route>
+                  <Route path="/auth/login" element={<Login />} />
+                  <Route path="/auth/register" element={<Register />} />
+                  <Route path="/auth/admin-login" element={<AdminLogin />} />
+                  <Route path="/auth/admin-register" element={<AdminRegister />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </SearchProvider>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>

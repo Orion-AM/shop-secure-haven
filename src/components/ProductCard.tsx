@@ -2,8 +2,10 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Heart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
   id: string;
@@ -15,13 +17,43 @@ interface ProductCardProps {
 
 const ProductCard = ({ id, name, price, image, category }: ProductCardProps) => {
   const { addItem } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const handleAddToCart = () => {
     addItem({ id, name, price, image });
   };
 
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation when clicking heart
+    
+    if (isInWishlist(id)) {
+      removeFromWishlist(id);
+    } else {
+      addToWishlist({ id, name, price, image, category });
+    }
+  };
+
   return (
-    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
+    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md relative">
+      <div className="absolute top-2 right-2 z-10">
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "w-8 h-8 rounded-full bg-white/80 hover:bg-white",
+            isInWishlist(id) && "text-red-500 hover:text-red-600"
+          )}
+          onClick={handleWishlistToggle}
+        >
+          <Heart 
+            className={cn(
+              "h-4 w-4",
+              isInWishlist(id) && "fill-current"
+            )} 
+          />
+        </Button>
+      </div>
+      
       <Link to={`/products/${id}`}>
         <div className="aspect-square overflow-hidden">
           <img

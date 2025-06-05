@@ -3,10 +3,11 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Menu, User, Search, LogOut, Settings, Shield } from "lucide-react";
+import { ShoppingCart, Menu, User, Search, LogOut, Settings, Shield, Heart } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import { useSearch } from "@/contexts/SearchContext";
 import { cn } from "@/lib/utils";
 import {
@@ -20,6 +21,7 @@ import {
 const Navbar = () => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
   const { itemCount } = useCart();
+  const { wishlistCount } = useWishlist();
   const { searchTerm, setSearchTerm, setIsSearching } = useSearch();
   const [mobileSearchVisible, setMobileSearchVisible] = useState(false);
   const navigate = useNavigate();
@@ -53,6 +55,12 @@ const Navbar = () => {
                 {isAuthenticated ? (
                   <>
                     <Link to="/account" className="px-2 py-1 text-lg font-medium">My Account</Link>
+                    {!isAdmin && (
+                      <Link to="/wishlist" className="px-2 py-1 text-lg font-medium flex items-center">
+                        <Heart className="h-4 w-4 mr-2" />
+                        Wishlist
+                      </Link>
+                    )}
                     {isAdmin && (
                       <Link to="/admin" className="px-2 py-1 text-lg font-medium flex items-center">
                         <Shield className="h-4 w-4 mr-2" />
@@ -118,6 +126,20 @@ const Navbar = () => {
             <span className="sr-only">Search</span>
           </Button>
 
+          {!isAdmin && isAuthenticated && (
+            <Link to="/wishlist">
+              <Button variant="ghost" size="icon" className="relative">
+                <Heart className="h-5 w-5" />
+                <span className="sr-only">Wishlist</span>
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                    {wishlistCount > 99 ? '99+' : wishlistCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+          )}
+
           {!isAdmin && (
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative">
@@ -153,6 +175,12 @@ const Navbar = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/account?tab=orders">My Orders</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/wishlist" className="flex items-center">
+                        <Heart className="h-4 w-4 mr-2" />
+                        Wishlist ({wishlistCount})
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>

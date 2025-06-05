@@ -1,12 +1,14 @@
-
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Heart } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
+import Reviews from "@/components/Reviews";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { cn } from "@/lib/utils";
 
 // Mock product data
 const mockProduct = {
@@ -62,6 +64,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const { addItem } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   
   // In a real app, we would fetch the product data based on the ID
   const product = mockProduct;
@@ -86,6 +89,20 @@ const ProductDetail = () => {
         name: product.name,
         price: product.price,
         image: product.images[0]
+      });
+    }
+  };
+
+  const handleWishlistToggle = () => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0],
+        category: product.category
       });
     }
   };
@@ -187,15 +204,27 @@ const ProductDetail = () => {
             <Button onClick={handleAddToCart} className="flex-1" disabled={product.stock === 0}>
               <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
             </Button>
+            
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={handleWishlistToggle}
+              className={cn(
+                isInWishlist(product.id) && "text-red-500 border-red-500 hover:bg-red-50"
+              )}
+            >
+              <Heart className={cn("h-4 w-4", isInWishlist(product.id) && "fill-current")} />
+            </Button>
           </div>
         </div>
       </div>
       
       <Tabs defaultValue="description" className="mb-12">
-        <TabsList className="grid w-full grid-cols-3 max-w-md">
+        <TabsList className="grid w-full grid-cols-4 max-w-md">
           <TabsTrigger value="description">Description</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
           <TabsTrigger value="specs">Specifications</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews</TabsTrigger>
         </TabsList>
         <TabsContent value="description" className="mt-6">
           <h3 className="text-lg font-semibold mb-2">Product Description</h3>
@@ -233,6 +262,9 @@ const ProductDetail = () => {
               <span className="text-muted-foreground">2-year limited warranty</span>
             </div>
           </div>
+        </TabsContent>
+        <TabsContent value="reviews" className="mt-6">
+          <Reviews productId={product.id} productName={product.name} />
         </TabsContent>
       </Tabs>
       
