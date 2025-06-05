@@ -18,23 +18,23 @@ const Footer = () => {
             <h3 className="text-lg font-semibold">Shop</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/products/featured" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/products" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  All Products
+                </Link>
+              </li>
+              <li>
+                <Link to="/categories" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Categories
+                </Link>
+              </li>
+              <li>
+                <Link to="/products?featured=true" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Featured Products
                 </Link>
               </li>
               <li>
-                <Link to="/products/new" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/products?sort=newest" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   New Arrivals
-                </Link>
-              </li>
-              <li>
-                <Link to="/products/bestsellers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Best Sellers
-                </Link>
-              </li>
-              <li>
-                <Link to="/products/deals" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Special Offers
                 </Link>
               </li>
             </ul>
@@ -100,12 +100,12 @@ const Footer = () => {
             © {new Date().getFullYear()} SecureHaven. All rights reserved.
           </p>
           <div className="mt-4 md:mt-0 flex items-center space-x-4">
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
               Privacy
-            </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+            </Link>
+            <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
               Terms
-            </a>
+            </Link>
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
               Cookies
             </a>

@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { Users, ShoppingCart, Package, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
+import { Users, ShoppingCart, Package, DollarSign, TrendingUp, TrendingDown, Plus, Edit, Trash2, Eye } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 // Mock data for the admin panel
 const statsData = {
@@ -62,6 +64,10 @@ const productData = [
 
 const Admin = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [editingProduct, setEditingProduct] = useState<string | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const StatCard = ({ title, value, icon: Icon, growth, isGrowthPositive }: any) => (
     <Card>
@@ -95,10 +101,75 @@ const Admin = () => {
     }
   };
 
+  const handleAddUser = () => {
+    toast.success("Add User functionality would open a form");
+    // In a real app, this would open a modal or navigate to a form
+  };
+
+  const handleEditUser = (userId: string) => {
+    setEditingUser(userId);
+    toast.info(`Editing user ${userId}`);
+    // In a real app, this would open an edit form
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    if (confirm("Are you sure you want to delete this user?")) {
+      toast.success(`User ${userId} deleted`);
+      // In a real app, this would make an API call to delete the user
+    }
+  };
+
+  const handleAddProduct = () => {
+    toast.success("Add Product functionality would open a form");
+    // In a real app, this would open a modal or navigate to a form
+  };
+
+  const handleEditProduct = (productId: string) => {
+    setEditingProduct(productId);
+    toast.info(`Editing product ${productId}`);
+    // In a real app, this would open an edit form
+  };
+
+  const handleDeleteProduct = (productId: string) => {
+    if (confirm("Are you sure you want to delete this product?")) {
+      toast.success(`Product ${productId} deleted`);
+      // In a real app, this would make an API call to delete the product
+    }
+  };
+
+  const handleViewOrder = (orderId: string) => {
+    toast.info(`Viewing order ${orderId}`);
+    // In a real app, this would navigate to order details
+  };
+
+  const handleUpdateOrderStatus = (orderId: string) => {
+    toast.success(`Order ${orderId} status updated`);
+    // In a real app, this would open a status update modal
+  };
+
+  const handleUpdateStock = (productId: string, newStock: number) => {
+    toast.success(`Product ${productId} stock updated to ${newStock}`);
+    // In a real app, this would make an API call to update stock
+  };
+
+  // Check if user is admin
+  if (!user || user.role !== 'admin') {
+    navigate('/auth/admin-login');
+    return null;
+  }
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Admin Dashboard</h2>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" onClick={() => navigate('/products')}>
+            View Store
+          </Button>
+          <Button onClick={() => toast.success("Export functionality would download a report")}>
+            Export Data
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
@@ -107,6 +178,7 @@ const Admin = () => {
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
+          <TabsTrigger value="inventory">Inventory</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -267,7 +339,7 @@ const Admin = () => {
           <Card>
             <CardHeader>
               <CardTitle>User Management</CardTitle>
-              <CardDescription>Manage registered users</CardDescription>
+              <CardDescription>Manage registered users and their permissions</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2 mb-4">
@@ -277,7 +349,10 @@ const Admin = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="max-w-sm"
                 />
-                <Button>Add User</Button>
+                <Button onClick={handleAddUser}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add User
+                </Button>
               </div>
               <Table>
                 <TableHeader>
@@ -285,6 +360,7 @@ const Admin = () => {
                     <TableHead>User ID</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead>Orders</TableHead>
                     <TableHead>Total Spent</TableHead>
@@ -297,13 +373,28 @@ const Admin = () => {
                       <TableCell className="font-medium">{user.id}</TableCell>
                       <TableCell>{user.name}</TableCell>
                       <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">User</Badge>
+                      </TableCell>
                       <TableCell>{user.joined}</TableCell>
                       <TableCell>{user.orders}</TableCell>
                       <TableCell>${user.spent}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">Edit</Button>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditUser(user.id)}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => handleDeleteUser(user.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -318,7 +409,7 @@ const Admin = () => {
           <Card>
             <CardHeader>
               <CardTitle>Product Management</CardTitle>
-              <CardDescription>Manage your product inventory</CardDescription>
+              <CardDescription>Manage your product catalog and inventory</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2 mb-4">
@@ -328,7 +419,10 @@ const Admin = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="max-w-sm"
                 />
-                <Button>Add Product</Button>
+                <Button onClick={handleAddProduct}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Product
+                </Button>
               </div>
               <Table>
                 <TableHeader>
@@ -338,6 +432,7 @@ const Admin = () => {
                     <TableHead>Category</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>Stock</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Sold</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -354,11 +449,28 @@ const Admin = () => {
                           {product.stock}
                         </Badge>
                       </TableCell>
+                      <TableCell>
+                        <Badge variant={product.stock === 0 ? "destructive" : "default"}>
+                          {product.stock === 0 ? "Out of Stock" : "In Stock"}
+                        </Badge>
+                      </TableCell>
                       <TableCell>{product.sold}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">Edit</Button>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditProduct(product.id)}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => handleDeleteProduct(product.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -411,8 +523,78 @@ const Admin = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">View</Button>
-                          <Button variant="outline" size="sm">Update</Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewOrder(order.id)}
+                          >
+                            <Eye className="w-3 h-3" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleUpdateOrderStatus(order.id)}
+                          >
+                            Update
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="inventory" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Inventory Management</CardTitle>
+              <CardDescription>Monitor and update product stock levels</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Current Stock</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {productData.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>
+                        <Badge variant={product.stock < 10 ? "destructive" : product.stock < 20 ? "secondary" : "default"}>
+                          {product.stock} units
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {product.stock === 0 && <Badge variant="destructive">Critical - Out of Stock</Badge>}
+                        {product.stock > 0 && product.stock < 10 && <Badge variant="secondary">Low Stock</Badge>}
+                        {product.stock >= 10 && <Badge variant="default">Good Stock</Badge>}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            defaultValue={product.stock}
+                            className="w-20"
+                            onChange={(e) => {
+                              const newStock = parseInt(e.target.value) || 0;
+                              handleUpdateStock(product.id, newStock);
+                            }}
+                          />
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleUpdateStock(product.id, product.stock + 10)}
+                          >
+                            +10
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

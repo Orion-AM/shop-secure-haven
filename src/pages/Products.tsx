@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,81 +8,94 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
 
-// Mock products data
+// Mock products data with stock information
 const mockProducts = [
   {
     id: "1",
     name: "Smart Home Security Camera",
     price: 129.99,
     image: "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&q=80&w=500",
-    category: "Security"
+    category: "Security Cameras",
+    stock: 15
   },
   {
     id: "2",
     name: "Biometric Door Lock",
     price: 249.99,
     image: "https://images.unsplash.com/photo-1622557850710-1ec5c4f46a43?auto=format&q=80&w=500",
-    category: "Home Security"
+    category: "Door Locks",
+    stock: 8
   },
   {
     id: "3",
     name: "Smart Doorbell with HD Video",
     price: 189.99,
     image: "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&q=80&w=500",
-    category: "Smart Home"
+    category: "Smart Doorbells",
+    stock: 23
   },
   {
     id: "4",
     name: "Wireless Security System",
     price: 399.99,
     image: "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&q=80&w=500",
-    category: "Security"
+    category: "Alarm Systems",
+    stock: 5
   },
   {
     id: "5",
     name: "Motion Sensor Lights",
     price: 79.99,
     image: "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&q=80&w=500",
-    category: "Home Security"
+    category: "Security Cameras",
+    stock: 0
   },
   {
     id: "6",
     name: "Personal Safety Alarm",
     price: 29.99,
     image: "https://images.unsplash.com/photo-1599577180698-29bc5cc5d4b9?auto=format&q=80&w=500",
-    category: "Personal Safety"
+    category: "Personal Safety",
+    stock: 45
   },
   {
     id: "7",
     name: "Secure Cloud Storage",
     price: 59.99,
     image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&q=80&w=500",
-    category: "Cybersecurity"
+    category: "Cybersecurity",
+    stock: 12
   },
   {
     id: "8",
     name: "Password Manager",
     price: 39.99,
     image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&q=80&w=500",
-    category: "Cybersecurity"
+    category: "Cybersecurity",
+    stock: 30
   }
 ];
 
-const categories = ["All", "Security", "Home Security", "Smart Home", "Personal Safety", "Cybersecurity"];
+const categories = ["All", "Security Cameras", "Door Locks", "Smart Doorbells", "Alarm Systems", "Personal Safety", "Cybersecurity"];
 
 const Products = () => {
+  const { category: urlCategory } = useParams();
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState(mockProducts);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
+  const [selectedCategory, setSelectedCategory] = useState(
+    urlCategory ? urlCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : "All"
+  );
   const [sortOption, setSortOption] = useState("featured");
+  const [showInStock, setShowInStock] = useState(false);
 
   // Simulate fetching products
   useEffect(() => {
     setLoading(true);
-    // In a real app, this would be an API call with filters
     const timer = setTimeout(() => {
       let filteredProducts = [...mockProducts];
       
@@ -97,6 +111,11 @@ const Products = () => {
         filteredProducts = filteredProducts.filter(product => 
           product.category === selectedCategory
         );
+      }
+      
+      // Apply stock filter
+      if (showInStock) {
+        filteredProducts = filteredProducts.filter(product => product.stock > 0);
       }
       
       // Apply sorting
@@ -120,11 +139,21 @@ const Products = () => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchTerm, selectedCategory, sortOption]);
+  }, [searchTerm, selectedCategory, sortOption, showInStock]);
+
+  // Update category when URL changes
+  useEffect(() => {
+    if (urlCategory) {
+      const formattedCategory = urlCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      setSelectedCategory(formattedCategory);
+    }
+  }, [urlCategory]);
 
   return (
     <div className="container py-8">
-      <h1 className="text-3xl font-bold mb-6">All Products</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        {selectedCategory === "All" ? "All Products" : selectedCategory}
+      </h1>
       
       {/* Search and Filters */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
@@ -161,6 +190,22 @@ const Products = () => {
                     </Label>
                   </div>
                 ))}
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div className="space-y-3">
+              <h3 className="font-medium text-lg">Availability</h3>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="in-stock"
+                  checked={showInStock}
+                  onCheckedChange={setShowInStock}
+                />
+                <Label htmlFor="in-stock" className="text-sm font-normal cursor-pointer">
+                  In Stock Only
+                </Label>
               </div>
             </div>
             
@@ -225,7 +270,18 @@ const Products = () => {
           ) : products.length > 0 ? (
             <div className="product-grid">
               {products.map((product) => (
-                <ProductCard key={product.id} {...product} />
+                <div key={product.id} className="relative">
+                  <ProductCard {...product} />
+                  <div className="absolute top-2 left-2">
+                    {product.stock === 0 ? (
+                      <Badge variant="destructive">Out of Stock</Badge>
+                    ) : product.stock < 10 ? (
+                      <Badge variant="secondary">Low Stock ({product.stock})</Badge>
+                    ) : (
+                      <Badge variant="default">In Stock ({product.stock})</Badge>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
